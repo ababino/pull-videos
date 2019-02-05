@@ -1,6 +1,5 @@
 from glob import glob
 from datetime import datetime, timedelta
-import pytz
 import os
 import shutil
 import argparse
@@ -24,7 +23,7 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
     logging.debug('dst folder: {}'.format(dst_folder))
     logging.debug('path to xeoma files: {}'.format(path_to_xeoma))
 
-    tzone = pytz.timezone(tzone)
+    # tzone = pytz.timezone(tzone)
 
     # path_to_xeoma = '/media/andres/Blue/Xeoma new setup '
     input_begin_time += ':00'
@@ -35,7 +34,8 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
     begin_time_list = [int(x) for x in begin_time_list]
 
     begin_naive_datetime = datetime(*begin_time_list)
-    begin_datetime = tzone.localize(begin_naive_datetime).astimezone(pytz.utc)
+    # begin_datetime = tzone.localize(begin_naive_datetime).astimezone(pytz.utc)
+    begin_datetime = begin_naive_datetime - timedelta(hours=tzone)
 
     # begin_date = begin_datetime.date().strftime('%Y-%m-%d')
     begin_time = begin_datetime.time().hour * 60 + begin_datetime.time().minute
@@ -46,7 +46,8 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
     end_time_list = [int(x) for x in end_time_list]
 
     end_naive_datetime = datetime(*end_time_list)
-    end_datetime = tzone.localize(end_naive_datetime).astimezone(pytz.utc)
+    # end_datetime = tzone.localize(end_naive_datetime).astimezone(pytz.utc)
+    end_datetime = end_naive_datetime - timedelta(hours=tzone)
 
     end_date = end_datetime.date().strftime('%Y-%m-%d')
     end_time = end_datetime.time().hour * 60 + end_datetime.time().minute
@@ -93,9 +94,11 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
                 shutil.copyfile(src, dst)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Pull Xeoma files for one session.', epilog='Examples...')
+    parser = argparse.ArgumentParser(description='Pull Xeoma files for one session.',
+                                     epilog='Examples \n python pull_session.py --session 2019-02-14 --begin_time 08:00 --end_time 14:03',
+                                     formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--xeoma_path', type=str, default='/Volumes/DataRAID/xeoma', help='Path to the Xeoma files. For example, /mnt/xeoma/')
-    parser.add_argument('--tzone', type=str, default='US/Eastern', help='Time zone where you are. For example, use US/Eastern if you are in Baltimore.')
+    parser.add_argument('--tzone', type=int, default=-5, help='Time zone where you are. For example, use -5 if you are in Baltimore, during the winter.')
     parser.add_argument('--session', type=str, help='Session date in YYYY-mm-dd format. For example, use 2019-01-23 to pull out videos captured on January 23 2019.')
     parser.add_argument('--begin_time', type=str,  help='Inital time in hh:mm format. For example, use 07:30 to pull out videos from 7:30 AM.')
     parser.add_argument('--end_time', type=str,  help='Final time in hh:mm format. For example, use 15:30 to pull out videos until 4:30 PM.')
