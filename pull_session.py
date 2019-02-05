@@ -112,5 +112,9 @@ if __name__ == '__main__':
         args.begin_time = raw_input('Begin time in date in hh:mm format: ')
     if not args.end_time:
         args.end_time = raw_input('End time in date in hh:mm format: ')
+        verbose = raw_input('Do you want verbose output (y/n): ')
+        if verbose == 'y':
+            logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                                datefmt='%Y-%m-%d:%H:%M:%S',level=logging.DEBUG)
 
     copy_files(args.xeoma_path, args.tzone, args.session, args.begin_time, args.end_time)
