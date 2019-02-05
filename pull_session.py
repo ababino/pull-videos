@@ -93,15 +93,24 @@ if __name__ == '__main__':
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--xeoma_path', type=str, default='/Volumes/DataRAID/xeoma', help='Path to the Xeoma files. For example, /mnt/xeoma/')
     parser.add_argument('--tzone', type=int, default=-5, help='Time zone where you are. For example, use -5 if you are in Baltimore, during the winter.')
-    parser.add_argument('--session', type=str, help='Session date in YYYY-mm-dd format. For example, use 2019-01-23 to pull out videos captured on January 23 2019.')
-    parser.add_argument('--begin_time', type=str,  help='Inital time in hh:mm format. For example, use 07:30 to pull out videos from 7:30 AM.')
-    parser.add_argument('--end_time', type=str,  help='Final time in hh:mm format. For example, use 15:30 to pull out videos until 4:30 PM.')
+    parser.add_argument('--session', type=str, default=None, help='Session date in YYYY-mm-dd format. For example, use 2019-01-23 to pull out videos captured on January 23 2019.')
+    parser.add_argument('--begin_time', type=str, default=None, help='Inital time in hh:mm format. For example, use 07:30 to pull out videos from 7:30 AM.')
+    parser.add_argument('--end_time', type=str, default=None,  help='Final time in hh:mm format. For example, use 15:30 to pull out videos until 4:30 PM.')
     parser.add_argument('-v', '--verbose', action='store_true', help='Increase verbosity.')
 
     args = parser.parse_args()
     if args.verbose:
         logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                             datefmt='%Y-%m-%d:%H:%M:%S',level=logging.DEBUG)
-
     logging.debug(args)
+    if not args.session:
+        args.session = raw_input('Session date in YYYY:mm:dd format: ')
+        tzone = raw_input('Time zone (default -5):')
+        if tzone != '':
+            args.tzone = tzone
+    if not args.begin_time:
+        args.begin_time = raw_input('Begin time in date in hh:mm format: ')
+    if not args.end_time:
+        args.end_time = raw_input('End time in date in hh:mm format: ')
+
     copy_files(args.xeoma_path, args.tzone, args.session, args.begin_time, args.end_time)
