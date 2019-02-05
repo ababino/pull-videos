@@ -1,14 +1,23 @@
 from glob import glob
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 import os
 import shutil
 import argparse
 import logging
+
 # tzone = 'US/Eastern'
 # input_date = '2019-01-23'
 # input_begin_time = glob'08:00'
 # input_end_time = '17:00'
+
+def daterange(start_date, end_date, inclusive=False):
+    if inclusive:
+        for n in range(int ((end_date - start_date).days) + 1):
+            yield start_date + timedelta(n)
+    else:
+        for n in range(int ((end_date - start_date).days)):
+            yield start_date + timedelta(n)
 
 def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_time):
     dst_folder = os.path.dirname(os.path.realpath(__file__))
@@ -44,7 +53,6 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
     logging.debug('end time in minutes: {}'.format(end_time))
 
 
-
     if not os.path.exists(session_date):
         logging.debug('{} folder does not exist. Making folder'.format(session_date))
         os.mkdir(session_date)
@@ -55,35 +63,37 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
     logging.debug('{}'.format(cameras))
     for camera_path in cameras:
         camera = os.path.basename(camera_path)
-        path_to_files = '/'.join([camera_path, session_date, 'h264'])
-        logging.debug('path_to_files {}'.format(path_to_files))
-        for minute in range(begin_time, end_time):
-            src = glob(path_to_files + '/' + str(minute).zfill(4) + '*')
-            logging.debug('src {}'.format(src))
-            if len(src) > 1:
-                raise ValueError
-            if len(src) < 1:
-                logging.warning('No file with format: {}'.format(path_to_files + '/' + str(minute).zfill(4) +'*'))
-                continue
-            src = src[0]
-            base_src = os.path.basename(src)
-            base_src_no_ext = base_src.split('.')[0]
-            ext = base_src.split('.')[1]
+        for date in daterange(begin_datetime.date(), end_datetime.date(), inclusive=True):
+            session_date = date.strftime('%Y-%m-%d')
+            path_to_files = '/'.join([camera_path, session_date, 'h264'])
+            logging.debug('path_to_files {}'.format(path_to_files))
+            for minute in range(begin_time, end_time):
+                src = glob(path_to_files + '/' + str(minute).zfill(4) + '*')
+                logging.debug('src {}'.format(src))
+                if len(src) > 1:
+                    raise ValueError
+                if len(src) < 1:
+                    logging.warning('No file with format: {}'.format(path_to_files + '/' + str(minute).zfill(4) +'*'))
+                    continue
+                src = src[0]
+                base_src = os.path.basename(src)
+                base_src_no_ext = base_src.split('.')[0]
+                ext = base_src.split('.')[1]
 
-            dst_file_name = '_'.join([session_date, base_src_no_ext, camera])
-            logging.debug(dst_file_name)
-            dst_file_name += '.' + ext
-            logging.debug(dst_file_name)
+                dst_file_name = '_'.join([session_date, base_src_no_ext, camera])
+                logging.debug(dst_file_name)
+                dst_file_name += '.' + ext
+                logging.debug(dst_file_name)
 
-            dst = dst_folder + '/' + session_date + '/'+ dst_file_name
+                dst = dst_folder + '/' + session_date + '/'+ dst_file_name
 
-            logging.debug(src)
-            logging.debug(dst)
-            shutil.copyfile(src, dst)
+                logging.debug(src)
+                logging.debug(dst)
+                shutil.copyfile(src, dst)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Pull Xeoma files for one session.', epilog='Examples...')
-    parser.add_argument('--xeoma_path', type=str, help='Path to the Xeoma files. For example, /mnt/xeoma/')
+    parser.add_argument('--xeoma_path', type=str, default='/Volumes/DataRAID/xeoma', help='Path to the Xeoma files. For example, /mnt/xeoma/')
     parser.add_argument('--tzone', type=str, default='US/Eastern', help='Time zone where you are. For example, use US/Eastern if you are in Baltimore.')
     parser.add_argument('--session', type=str, help='Session date in YYYY-mm-dd format. For example, use 2019-01-23 to pull out videos captured on January 23 2019.')
     parser.add_argument('--begin_time', type=str,  help='Inital time in hh:mm format. For example, use 07:30 to pull out videos from 7:30 AM.')
@@ -96,5 +106,4 @@ if __name__ == '__main__':
                             datefmt='%Y-%m-%d:%H:%M:%S',level=logging.DEBUG)
 
     logging.debug(args)
-    # logging.debug(args.xeoma_path, args.tzone, args.session, args.begin_time, args.end_time)
     copy_files(args.xeoma_path, args.tzone, args.session, args.begin_time, args.end_time)
