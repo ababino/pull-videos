@@ -4,15 +4,16 @@ import pytz
 import os
 import shutil
 import argparse
-
+import logging
 # tzone = 'US/Eastern'
 # input_date = '2019-01-23'
-# input_begin_time = '08:00'
+# input_begin_time = glob'08:00'
 # input_end_time = '17:00'
 
 def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_time):
     dst_folder = os.path.dirname(os.path.realpath(__file__))
-    print('dst_folder', dst_folder)
+    logging.debug('dst folder: {}'.format(dst_folder))
+    logging.debug('path to xeoma files: {}'.format(path_to_xeoma))
 
     tzone = pytz.timezone(tzone)
 
@@ -29,7 +30,7 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
 
     # begin_date = begin_datetime.date().strftime('%Y-%m-%d')
     begin_time = begin_datetime.time().hour * 60 + begin_datetime.time().minute
-
+    logging.debug('begin time in minutes: {}'.format(begin_time))
 
     end_time_list = session_date.split('-')
     end_time_list.extend(input_end_time.split(':'))
@@ -39,39 +40,45 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
     end_datetime = tzone.localize(end_naive_datetime).astimezone(pytz.utc)
 
     end_date = end_datetime.date().strftime('%Y-%m-%d')
-    end_time = end_datetime.time().hour * 60 + begin_datetime.time().minute
+    end_time = end_datetime.time().hour * 60 + end_datetime.time().minute
+    logging.debug('end time in minutes: {}'.format(end_time))
 
 
 
     if not os.path.exists(session_date):
+        logging.debug('{} folder does not exist. Making folder'.format(session_date))
         os.mkdir(session_date)
+    else:
+        logging.debug('{} folder does already exist.'.format(session_date))
 
     cameras = glob(path_to_xeoma + '/*')
-
+    logging.debug('{}'.format(cameras))
     for camera_path in cameras:
         camera = os.path.basename(camera_path)
         path_to_files = '/'.join([camera_path, session_date, 'h264'])
+        logging.debug('path_to_files {}'.format(path_to_files))
         for minute in range(begin_time, end_time):
-            src = glob(path_to_files + '/' + str(minute).zfill(4) +'*')
+            src = glob(path_to_files + '/' + str(minute).zfill(4) + '*')
+            logging.debug('src {}'.format(src))
             if len(src) > 1:
                 raise ValueError
             if len(src) < 1:
-                print('No file with format:')
-                print(path_to_files + '/' + str(minute).zfill(4) +'*')
-                raise ValueError
+                logging.warning('No file with format: {}'.format(path_to_files + '/' + str(minute).zfill(4) +'*'))
+                continue
             src = src[0]
             base_src = os.path.basename(src)
             base_src_no_ext = base_src.split('.')[0]
             ext = base_src.split('.')[1]
 
             dst_file_name = '_'.join([session_date, base_src_no_ext, camera])
-            print(dst_file_name)
+            logging.debug(dst_file_name)
             dst_file_name += '.' + ext
-            print(dst_file_name)
+            logging.debug(dst_file_name)
 
             dst = dst_folder + '/' + session_date + '/'+ dst_file_name
 
-            print(src, dst)
+            logging.debug(src)
+            logging.debug(dst)
             shutil.copyfile(src, dst)
 
 if __name__ == '__main__':
@@ -81,8 +88,13 @@ if __name__ == '__main__':
     parser.add_argument('--session', type=str, help='Session date in YYYY-mm-dd format. For example, use 2019-01-23 to pull out videos captured on January 23 2019.')
     parser.add_argument('--begin_time', type=str,  help='Inital time in hh:mm format. For example, use 07:30 to pull out videos from 7:30 AM.')
     parser.add_argument('--end_time', type=str,  help='Final time in hh:mm format. For example, use 15:30 to pull out videos until 4:30 PM.')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Increase verbosity.')
 
     args = parser.parse_args()
-    print(args)
-    print(args.xeoma_path, args.tzone, args.session, args.begin_time, args.end_time)
+    if args.verbose:
+        logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
+                            datefmt='%Y-%m-%d:%H:%M:%S',level=logging.DEBUG)
+
+    logging.debug(args)
+    # logging.debug(args.xeoma_path, args.tzone, args.session, args.begin_time, args.end_time)
     copy_files(args.xeoma_path, args.tzone, args.session, args.begin_time, args.end_time)
