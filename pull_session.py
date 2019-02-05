@@ -75,7 +75,7 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
             shutil.copyfile(src, dst)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Pull Xeoma files for one session.')
+    parser = argparse.ArgumentParser(description='Pull Xeoma files for one session.', epilog='Examples...')
     parser.add_argument('--xeoma_path', type=str, help='Path to the Xeoma files. For example, /mnt/xeoma/')
     parser.add_argument('--tzone', type=str, default='US/Eastern', help='Time zone where you are. For example, use US/Eastern if you are in Baltimore.')
     parser.add_argument('--session', type=str, help='Session date in YYYY-mm-dd format. For example, use 2019-01-23 to pull out videos captured on January 23 2019.')
