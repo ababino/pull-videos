@@ -54,6 +54,14 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
     else:
         logging.debug('{} folder does already exist.'.format(session_date))
 
+    cammera_dict = {'Preview+Archive.27': 'overhead-mid-right',
+                    'Preview+Archive.70': 'dpad-left',
+                    'Preview+Archive.4': 'dpad-right',
+                    'Preview+Archive.42': 'overhead-right-ptz',
+                    'Preview+Archive.62': 'pit-left',
+                    'Preview+Archive.55': 'pit-center',
+                    'Preview+Archive.48': 'pit-right',
+                    'Preview+Archive.23': 'overhead'}
     cameras = glob(path_to_xeoma + '/*')
     logging.debug('{}'.format(cameras))
     for camera_path in cameras:
@@ -104,7 +112,7 @@ if __name__ == '__main__':
                             datefmt='%Y-%m-%d:%H:%M:%S',level=logging.DEBUG)
     logging.debug(args)
     if not args.session:
-        args.session = raw_input('Session date in YYYY:mm:dd format: ')
+        args.session = raw_input('Session date in YYYY-mm-dd format: ')
         tzone = raw_input('Time zone (default -5):')
         if tzone != '':
             args.tzone = tzone
