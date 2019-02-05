@@ -69,13 +69,14 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
             logging.debug('path_to_files {}'.format(path_to_files))
             for minute in range(begin_time, end_time):
                 src = glob(path_to_files + '/' + str(minute).zfill(4) + '*')
-                logging.debug('src {}'.format(src))
                 if len(src) > 1:
+                    logging.debug('src {}'.format(src))
                     raise ValueError
                 if len(src) < 1:
                     logging.warning('No file with format: {}'.format(path_to_files + '/' + str(minute).zfill(4) +'*'))
                     continue
                 src = src[0]
+                logging.debug('src {}'.format(src))
                 base_src = os.path.basename(src)
                 base_src_no_ext = base_src.split('.')[0]
                 ext = base_src.split('.')[1]
