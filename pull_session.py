@@ -6,10 +6,6 @@ import shutil
 import argparse
 import logging
 
-# tzone = 'US/Eastern'
-# input_date = '2019-01-23'
-# input_begin_time = glob'08:00'
-# input_end_time = '17:00'
 
 def daterange(start_date, end_date, inclusive=False):
     if inclusive:
@@ -24,9 +20,6 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
     logging.debug('dst folder: {}'.format(dst_folder))
     logging.debug('path to xeoma files: {}'.format(path_to_xeoma))
 
-    # tzone = pytz.timezone(tzone)
-
-    # path_to_xeoma = '/media/andres/Blue/Xeoma new setup '
     input_begin_time += ':00'
     input_end_time += ':00'
 
