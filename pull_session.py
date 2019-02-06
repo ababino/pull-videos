@@ -53,7 +53,7 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
 
     if not os.path.exists(session_date):
         logging.debug('{} folder does not exist. Making folder'.format(session_date))
-        os.mkdir(session_date)
+        os.mkdir(dst_folder + '/' + session_date)
     else:
         logging.debug('{} folder does already exist.'.format(session_date))
 
