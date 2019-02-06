@@ -125,10 +125,7 @@ if __name__ == '__main__':
     if not args.end_time:
         args.end_time = input('End time in hh:mm format: ')
         verbose = input('Do you want verbose output (y/n): ')
-        print(verbose)
-        print(verbose == 'y')
         if verbose == 'y':
-            print('ah')
             logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                                 datefmt='%Y-%m-%d:%H:%M:%S',level=logging.DEBUG)
     logging.debug(args)
