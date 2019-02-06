@@ -57,7 +57,7 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
     else:
         logging.debug('{} folder does already exist.'.format(session_date))
 
-    cammera_dict = {'Preview+Archive.27': 'overhead-mid-right',
+    camera_dict = {'Preview+Archive.27': 'overhead-mid-right',
                     'Preview+Archive.70': 'dpad-left',
                     'Preview+Archive.4': 'dpad-right',
                     'Preview+Archive.42': 'overhead-right-ptz',
