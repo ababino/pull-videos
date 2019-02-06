@@ -50,10 +50,10 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
     end_time = end_datetime.time().hour * 60 + end_datetime.time().minute
     logging.debug('end time in minutes: {}'.format(end_time))
 
-
-    if not os.path.exists(session_date):
-        logging.debug('{} folder does not exist. Making folder'.format(session_date))
-        os.mkdir(dst_folder + '/' + session_date)
+    dst_session_folder = dst_folder + '/' + session_date
+    if not os.path.exists(dst_session_folder):
+        logging.debug('{} folder does not exist. Making folder'.format(dst_session_folder))
+        os.mkdir(dst_session_folder)
     else:
         logging.debug('{} folder does already exist.'.format(session_date))
 
