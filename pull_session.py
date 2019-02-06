@@ -69,6 +69,8 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
     logging.debug('{}'.format(cameras))
     for camera_path in cameras:
         camera = os.path.basename(camera_path)
+        if camera in camera_dict:
+            camera = camera_dict[camera]
         for date in daterange(begin_datetime.date(), end_datetime.date(), inclusive=True):
             session_date = date.strftime('%Y-%m-%d')
             path_to_files = '/'.join([camera_path, session_date, 'h264'])
