@@ -76,29 +76,30 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
             path_to_files = '/'.join([camera_path, session_date, 'h264'])
             logging.debug('path_to_files {}'.format(path_to_files))
             for minute in range(begin_time, end_time):
-                src = glob(path_to_files + '/' + str(minute).zfill(4) + '*')
-                if len(src) > 1:
+                srcs = glob(path_to_files + '/' + str(minute).zfill(4) + '*')
+                if len(srcs) > 1:
                     logging.debug('src {}'.format(src))
-                    raise ValueError
-                if len(src) < 1:
+                    # raise ValueError
+                if len(srcs) < 1:
                     logging.warning('No file with format: {}'.format(path_to_files + '/' + str(minute).zfill(4) +'*'))
                     continue
-                src = src[0]
-                logging.debug('src {}'.format(src))
-                base_src = os.path.basename(src)
-                base_src_no_ext = base_src.split('.')[0]
-                ext = base_src.split('.')[1]
+                for src in srcs:
+                    # src = src[0]
+                    logging.debug('src {}'.format(src))
+                    base_src = os.path.basename(src)
+                    base_src_no_ext = base_src.split('.')[0]
+                    ext = base_src.split('.')[1]
 
-                dst_file_name = '_'.join([session_date, base_src_no_ext, camera])
-                logging.debug(dst_file_name)
-                dst_file_name += '.' + ext
-                logging.debug(dst_file_name)
+                    dst_file_name = '_'.join([session_date, base_src_no_ext, camera])
+                    logging.debug(dst_file_name)
+                    dst_file_name += '.' + ext
+                    logging.debug(dst_file_name)
 
-                dst = dst_folder + '/' + session_date + '/'+ dst_file_name
+                    dst = dst_folder + '/' + session_date + '/'+ dst_file_name
 
-                logging.debug(src)
-                logging.debug(dst)
-                shutil.copyfile(src, dst)
+                    logging.debug(src)
+                    logging.debug(dst)
+                    shutil.copyfile(src, dst)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Pull Xeoma files for one session.',
@@ -119,7 +120,7 @@ if __name__ == '__main__':
         args.session = input('Session date in YYYY-mm-dd format: ')
         tzone = input('Time zone (default -5):')
         if tzone != '':
-            args.tzone = tzone
+            args.tzone = int(tzone)
     if not args.begin_time:
         args.begin_time = input('Begin time in hh:mm format: ')
     if not args.end_time:
