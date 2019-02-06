@@ -5,7 +5,10 @@ import os
 import shutil
 import argparse
 import logging
-
+try:
+    input = raw_input
+except NameError:
+    pass
 
 def daterange(start_date, end_date, inclusive=False):
     if inclusive:
@@ -110,19 +113,21 @@ if __name__ == '__main__':
     if args.verbose:
         logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                             datefmt='%Y-%m-%d:%H:%M:%S',level=logging.DEBUG)
-    logging.debug(args)
     if not args.session:
-        args.session = raw_input('Session date in YYYY-mm-dd format: ')
-        tzone = raw_input('Time zone (default -5):')
+        args.session = input('Session date in YYYY-mm-dd format: ')
+        tzone = input('Time zone (default -5):')
         if tzone != '':
             args.tzone = tzone
     if not args.begin_time:
-        args.begin_time = raw_input('Begin time in date in hh:mm format: ')
+        args.begin_time = input('Begin time in hh:mm format: ')
     if not args.end_time:
-        args.end_time = raw_input('End time in date in hh:mm format: ')
-        verbose = raw_input('Do you want verbose output (y/n): ')
+        args.end_time = input('End time in hh:mm format: ')
+        verbose = input('Do you want verbose output (y/n): ')
+        print(verbose)
+        print(verbose == 'y')
         if verbose == 'y':
+            print('ah')
             logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                                 datefmt='%Y-%m-%d:%H:%M:%S',level=logging.DEBUG)
-
+    logging.debug(args)
     copy_files(args.xeoma_path, args.tzone, args.session, args.begin_time, args.end_time)
