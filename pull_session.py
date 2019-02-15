@@ -18,7 +18,8 @@ def daterange(start_date, end_date, inclusive=False):
         for n in range(int ((end_date - start_date).days)):
             yield start_date + timedelta(n)
 
-def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_time):
+def copy_files(path_to_xeoma, tzone, session_date, input_begin_time,
+               input_end_time, force):
     dst_folder = os.path.dirname(os.path.realpath(__file__))
     logging.debug('dst folder: {}'.format(dst_folder))
     logging.debug('path to xeoma files: {}'.format(path_to_xeoma))
@@ -96,7 +97,9 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time, input_end_t
                     logging.debug(dst_file_name)
 
                     dst = dst_folder + '/' + session_date + '/'+ dst_file_name
-
+                    if os.path.exists(dst) and not force:
+                        logging.debug('path already exists {}'.format(dst))
+                        logging.debug('skip')
                     logging.debug(src)
                     logging.debug(dst)
                     shutil.copyfile(src, dst)
@@ -111,6 +114,7 @@ if __name__ == '__main__':
     parser.add_argument('--begin_time', type=str, default=None, help='Inital time in hh:mm format. For example, use 07:30 to pull out videos from 7:30 AM.')
     parser.add_argument('--end_time', type=str, default=None,  help='Final time in hh:mm format. For example, use 15:30 to pull out videos until 4:30 PM.')
     parser.add_argument('-v', '--verbose', action='store_true', help='Increase verbosity.')
+    parser.add_argument('-f', '--force', action='store_true', help='It copyes the files even thought they already exists.')
 
     args = parser.parse_args()
     if args.verbose:
@@ -130,4 +134,4 @@ if __name__ == '__main__':
             logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                                 datefmt='%Y-%m-%d:%H:%M:%S',level=logging.DEBUG)
     logging.debug(args)
-    copy_files(args.xeoma_path, args.tzone, args.session, args.begin_time, args.end_time)
+    copy_files(args.xeoma_path, args.tzone, args.session, args.begin_time, args.end_time, args.force)
