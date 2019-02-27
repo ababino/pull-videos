@@ -90,8 +90,10 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time,
                     base_src = os.path.basename(src)
                     base_src_no_ext = base_src.split('.')[0]
                     ext = base_src.split('.')[1]
-
-                    dst_file_name = '_'.join([session_date, base_src_no_ext, camera])
+                    minute_in_local_time = minute - 300
+                    local_hour = str(int(minute_in_local_time / 60.)).zfill(2)
+                    local_minute =  str(minute_in_local_time % 60).zfill(2)
+                    dst_file_name = '_'.join([session_date, local_hour, local_minute, base_src_no_ext, camera])
                     logging.debug(dst_file_name)
                     dst_file_name += '.' + ext
                     logging.debug(dst_file_name)
