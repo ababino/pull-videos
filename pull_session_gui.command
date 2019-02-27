@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 try:
     from tkFileDialog import askopenfilename
     from tkMessageBox import showwarning
@@ -210,7 +211,8 @@ class Application(Tkinter.Frame):
 
 if __name__ == '__main__':
     root = Tkinter.Tk()
-    # root.tk.call('tk', 'scaling', 10.0)
+    root.tk.call('tk', 'scaling', 10.0)
     app = Application(master=root)
+    # app.tk.call('tk', 'scaling', 10.0)
     app.mainloop()
     root.destroy()
