@@ -25,8 +25,8 @@ def daterange(start_date, end_date, inclusive=False):
         for n in range(int ((end_date - start_date).days)):
             yield start_date + timedelta(n)
 
-def copy_files(path_to_xeoma, tzone, session_date, input_begin_time,
-               input_end_time, force):
+def copy_files(path_to_xeoma, tzone, input_begin_date, input_end_date,
+               input_begin_time, input_end_time, force):
     dst_folder = os.path.dirname(os.path.realpath(__file__))
     logging.debug('dst folder: {}'.format(dst_folder))
     logging.debug('path to xeoma files: {}'.format(path_to_xeoma))
@@ -34,7 +34,7 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time,
     input_begin_time += ':00'
     input_end_time += ':00'
 
-    begin_time_list = session_date.split('-')
+    begin_time_list = input_begin_date.split('-')
     begin_time_list.extend(input_begin_time.split(':'))
     begin_time_list = [int(x) for x in begin_time_list]
 
@@ -46,7 +46,7 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time,
     begin_time = begin_datetime.time().hour * 60 + begin_datetime.time().minute
     logging.debug('begin time in minutes: {}'.format(begin_time))
 
-    end_time_list = session_date.split('-')
+    end_time_list = input_end_date.split('-')
     end_time_list.extend(input_end_time.split(':'))
     end_time_list = [int(x) for x in end_time_list]
 
@@ -57,13 +57,6 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time,
     end_date = end_datetime.date().strftime('%Y-%m-%d')
     end_time = end_datetime.time().hour * 60 + end_datetime.time().minute
     logging.debug('end time in minutes: {}'.format(end_time))
-
-    dst_session_folder = dst_folder + '/' + session_date
-    if not os.path.exists(dst_session_folder):
-        logging.debug('{} folder does not exist. Making folder'.format(dst_session_folder))
-        os.mkdir(dst_session_folder)
-    else:
-        logging.debug('{} folder does already exist.'.format(session_date))
 
     camera_dict = {'Preview+Archive.27': 'overhead-mid-right',
                     'Preview+Archive.70': 'dpad-left',
@@ -81,6 +74,14 @@ def copy_files(path_to_xeoma, tzone, session_date, input_begin_time,
             camera = camera_dict[camera]
         for date in daterange(begin_datetime.date(), end_datetime.date(), inclusive=True):
             session_date = date.strftime('%Y-%m-%d')
+
+            dst_session_folder = dst_folder + '/' + session_date
+            if not os.path.exists(dst_session_folder):
+                logging.debug('{} folder does not exist. Making folder'.format(dst_session_folder))
+                os.mkdir(dst_session_folder)
+            else:
+                logging.debug('{} folder does already exist.'.format(session_date))
+
             path_to_files = '/'.join([camera_path, session_date, 'h264'])
             logging.debug('path_to_files {}'.format(path_to_files))
             for minute in range(begin_time, end_time):
@@ -126,7 +127,7 @@ class Application(Tkinter.Frame):
         if self.v.get():
             logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                                 datefmt='%Y-%m-%d:%H:%M:%S',level=logging.DEBUG)
-        copy_files(self.xeoma_path.get(), self.tzone.get(), self.session.get(), self.begin_time.get(), self.end_time.get(), self.force.get())
+        copy_files(self.xeoma_path.get(), self.tzone.get(), self.begin_date.get(), self.end_date.get(), self.begin_time.get(), self.end_time.get(), self.force.get())
         self.quit()
 
     def create_widgets(self):
@@ -150,18 +151,28 @@ class Application(Tkinter.Frame):
                                              *tzones)
         self.tzone_menu.pack(fill=Tkinter.BOTH, expand=1)
 
-        # session frame
-        self.session_frame = Tkinter.Frame(self.tzone_frame)
-        self.session_frame.pack(fill=Tkinter.BOTH, expand=1)
-        w3 = Tkinter.Label(self.session_frame, text="Session (yyyy-mm-dd):")
+        # begin date frame
+        self.begin_date_frame = Tkinter.Frame(self.tzone_frame)
+        self.begin_date_frame.pack(fill=Tkinter.BOTH, expand=1)
+        w3 = Tkinter.Label(self.begin_date_frame, text="Begin date (yyyy-mm-dd):")
         w3.pack()
         today = datetime.today().strftime('%Y-%m-%d')
-        self.session = Tkinter.StringVar(root, value=today)
-        self.session_entry = Tkinter.Entry(self.session_frame, textvariable=self.session)
-        self.session_entry.pack(fill=Tkinter.BOTH, expand=1)
+        self.begin_date = Tkinter.StringVar(root, value=today)
+        self.begin_date_entry = Tkinter.Entry(self.begin_date_frame, textvariable=self.begin_date)
+        self.begin_date_entry.pack(fill=Tkinter.BOTH, expand=1)
+
+        # session frame
+        self.end_date_frame = Tkinter.Frame(self.begin_date_frame)
+        self.end_date_frame.pack(fill=Tkinter.BOTH, expand=1)
+        w3 = Tkinter.Label(self.end_date_frame, text="End date (yyyy-mm-dd):")
+        w3.pack()
+        today = datetime.today().strftime('%Y-%m-%d')
+        self.end_date = Tkinter.StringVar(root, value=today)
+        self.end_date_entry = Tkinter.Entry(self.end_date_frame, textvariable=self.end_date)
+        self.end_date_entry.pack(fill=Tkinter.BOTH, expand=1)
 
         # begin frame
-        self.begin_frame = Tkinter.Frame(self.session_frame)
+        self.begin_frame = Tkinter.Frame(self.end_date_frame)
         self.begin_frame.pack(fill=Tkinter.BOTH, expand=1)
         w4 = Tkinter.Label(self.begin_frame, text="begin time (hh-mm):")
         w4.pack()
@@ -170,7 +181,7 @@ class Application(Tkinter.Frame):
         self.begin_entry.pack(fill=Tkinter.BOTH, expand=1)
 
         # end frame
-        self.end_frame = Tkinter.Frame(self.session_frame)
+        self.end_frame = Tkinter.Frame(self.begin_frame)
         self.end_frame.pack(fill=Tkinter.BOTH, expand=1)
         w4 = Tkinter.Label(self.end_frame, text="end time (hh-mm):")
         w4.pack()
